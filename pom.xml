@@ -13,12 +13,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
+
         <spring.version>4.2.4.RELEASE</spring.version>
-        <org.glassfish.jersey.version>2.13</org.glassfish.jersey.version>
+        <jersey.version>2.13</jersey.version>
         <javax.servlet.version>3.1.0</javax.servlet.version>
         <jackson.version>2.5.1</jackson.version>
-
     </properties>
+
     <dependencies>
         <!-- Spring -->
         <dependency>
@@ -86,24 +87,24 @@
         <dependency>
             <groupId>org.glassfish.jersey.ext</groupId>
             <artifactId>jersey-spring3</artifactId>
-            <version>${org.glassfish.jersey.version}</version>
+            <version>${jersey.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
-            <version>${org.glassfish.jersey.version}</version>
+            <version>${jersey.version}</version>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-multipart</artifactId>
-            <version>${org.glassfish.jersey.version}</version>
+            <version>${jersey.version}</version>
         </dependency>
 
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-sse</artifactId>
-            <version>${org.glassfish.jersey.version}</version>
+            <version>${jersey.version}</version>
         </dependency>
 
         <!-- Test -->
