@@ -1,0 +1,139 @@
+<html>
+<head>
+    <title>SSE Test</title>
+    <script src="/js/jquery-3.1.0.min.js"></script>
+
+    <script>
+        $(function () {
+
+            $.fn.extend({
+                disable: function(state) {
+                    return this.each(function() {
+                        this.disabled = state;
+                    });
+                }
+            });
+
+            function log() {
+                var arr = Array.prototype.slice.call(arguments);
+                console.log.apply(console, arr);
+
+                arr.forEach(function(elem, idx) {
+                   if(typeof elem !== "string") {
+                       arr[idx] = JSON.stringify(elem);
+                   }
+                });
+                var txt = arr.join(", ");
+                $("#log").append("<p>" + txt + "</p>");
+            }
+
+            function createEventSource(url, options) {
+                var evSrc = new EventSource(url);
+
+                if (options && options.onMessage) {
+                    evSrc.onmessage = options.onMessage;
+                }
+                if (options && options.onError) {
+                    evSrc.onmessage = options.onError;
+                }
+                if (options && options.onOpen) {
+                    evSrc.onopen = options.onOpen;
+                }
+                if (options && options.events) {
+                    for (var key in options.events) {
+                        evSrc.addEventListener(key, options.events[key], false);
+                    }
+                }
+                return evSrc;
+            }
+
+            function createEventOptions(methodName, eventNames) {
+                var events = {};
+                eventNames.forEach(function (name) {
+                    events[name] = function (e) {
+                        log(methodName + "." + name + "()", e.data);
+                    }
+                });
+
+                return {
+                    onOpen: function (e) {
+                        log(methodName + ".onOpen()", e);
+                    },
+                    onError: function (e) {
+                        log(methodName + ".onError()", e);
+                    },
+                    onMessage: function (e) {
+                        log(methodName + ".onMessage()", e);
+                    },
+                    events: events
+                };
+            }
+
+            var broadcast, forever;
+
+            $("#clear").on("click", function(){
+                $("#log").empty();
+            });
+
+            $("#info").on("click", function(){
+                $.get("/rest/events/info", function(data, status){
+                    log(data, status);
+                });
+            });
+
+            $("#start-event").on("click", function(){
+                $("#start-event").disable(true);
+                $("#stop-event").disable(false);
+                forever = createEventSource('/rest/events/forever', createEventOptions('forever', ['forever0', 'forever1']));
+            });
+
+            $("#stop-event").disable(true).on("click", function(){
+                $("#stop-event").disable(true);
+                $("#start-event").disable(false);
+                forever.close();
+                forever = null;
+            });
+
+            $("#start-listen").on("click", function(){
+                $("#start-listen").disable(true);
+                $("#stop-listen").disable(false);
+                broadcast = createEventSource('/rest/events', createEventOptions('broadcast', ['broadcast']));
+            });
+
+            $("#stop-listen").disable(true).on("click", function(){
+                $("#stop-listen").disable(true);
+                $("#start-listen").disable(false);
+                broadcast.close();
+                broadcast = null;
+            });
+
+
+            $("#send").on("click", function(){
+                var message = $("#message").val();
+                $.post("/rest/events", message, function(data, status){
+                    console.log("post returned: ", data, status);
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <h2>Server Sent Events Test</h2>
+    <p>
+        <button id="clear">Clear</button>
+        <button id="info">get Info</button>
+    </p>
+    <p>
+        <button id="start-event">Register Event Listener</button>
+        <button id="stop-event">Stop Event Listener</button>
+    </p>
+    <p>
+        <button id="start-listen">Register Broadcast Listener</button>
+        <button id="stop-listen">Stop Broadcast Listener</button>
+        <input id="message" type="text">
+        <button id="send">Send message</button>
+    </p>
+    <div id="log"></div>
+</body>
+</html>
